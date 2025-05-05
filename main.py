@@ -1,15 +1,29 @@
-from aiogram import Bot, Dispatcher, types
 import os
 from dotenv import load_dotenv
+import asyncio
+import logging
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters.command import Command
+
+from bot.handlers.start import start_command
+
+logging.basicConfig(level=logging.DEBUG)
+
 
 load_dotenv()
 bot = Bot(token=os.getenv("BOT_TOKEN"))
 user = os.getenv("USER_ID")
+dp = Dispatcher()
 
 
-async def test_bot():
-    await bot.send_message(user, "Бот работает!")  # Замени 123456789 на свой ID
+@dp.message(Command("start"))
+async def cmd_start(message: types.Message):
+    await start_command(message)
 
-if __name__ == '__main__':
-    import asyncio
-    asyncio.run(test_bot())
+
+async def main():
+    await dp.start_polling(bot)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
