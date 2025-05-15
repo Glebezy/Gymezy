@@ -29,3 +29,6 @@ SQLAlchemy==2.0.40
 typing-inspection==0.4.0
 typing_extensions==4.13.2
 yarl==1.20.0
+pytest
+pytest-asyncio
+aiosqlite~=0.21.0

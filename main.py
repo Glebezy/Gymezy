@@ -6,6 +6,7 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters.command import Command
 
 from bot.handlers.start import start_command
+from data.db import init_db
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -22,6 +23,7 @@ async def cmd_start(message: types.Message):
 
 
 async def main():
+    await init_db()
     await dp.start_polling(bot)
 
 
