@@ -1,34 +1,30 @@
 from aiogram import types
-from data.db import SessionLocal
+from data.db import AsyncSessionLocal
+from sqlalchemy import select
 from data.models import User
 
 
 async def start_command(message: types.Message):
-    db = SessionLocal()
+    db = AsyncSessionLocal()
 
-    try:
-        # Проверяем, зарегистрирован ли пользователь
-        user = db.query(User).filter(User.telegram_id == message.from_user.id).first()
+    async with db as session:
+        result = await session.execute(
+            select(User.id).filter_by(telegram_id=message.from_user.id)
+        )
+        user = result.scalar_one_or_none()  # Важно!
 
-        if not user:
+        if user is None:
             # Регистрируем нового пользователя
             new_user = User(
                 telegram_id=message.from_user.id,
                 name=message.from_user.first_name,
                 username=message.from_user.username
             )
-            db.add(new_user)
-            db.commit()
+            session.add(new_user)
+            await session.commit()
             await message.answer(
                 "🎉 Добро пожаловать в GymezyBot!\n"
                 "Я помогу тебе отслеживать твои тренировки."
             )
         else:
             await message.answer("С возвращением! 🏋️")
-
-    except Exception as e:
-        db.rollback()
-        print(f"Ошибка при регистрации: {e}")
-        await message.answer("Произошла ошибка")
-    finally:
-        db.close()
