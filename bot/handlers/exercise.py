@@ -1,7 +1,7 @@
-from aiogram import Router, F
+from aiogram import Router
 from aiogram.filters import Command
-from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
+from aiogram.types import Message
 from sqlalchemy import select
 
 from .states import ExerciseStates
@@ -76,4 +76,3 @@ async def process_exercise_approve(message: Message, state: FSMContext):
     else:
         await message.answer("Для добавления упражнения введите /add_exercise")
     await state.clear()
-

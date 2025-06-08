@@ -9,12 +9,11 @@ async def start_command(message: types.Message):
 
     async with db as session:
         result = await session.execute(
-            select(User.id).filter_by(telegram_id=message.from_user.id)
+            select(User).filter_by(telegram_id=message.from_user.id)
         )
-        user = result.scalar_one_or_none()  # Важно!
+        user = result.scalar_one_or_none()
 
         if user is None:
-            # Регистрируем нового пользователя
             new_user = User(
                 telegram_id=message.from_user.id,
                 name=message.from_user.first_name,
@@ -27,4 +26,4 @@ async def start_command(message: types.Message):
                 "Я помогу тебе отслеживать твои тренировки."
             )
         else:
-            await message.answer("С возвращением! 🏋️")
+            await message.answer(f"С возвращением, {user.name} 🏋️")
