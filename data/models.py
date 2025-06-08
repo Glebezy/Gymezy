@@ -1,4 +1,4 @@
-from sqlalchemy import Integer
+from sqlalchemy import Integer, ForeignKey
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import Mapped, declared_attr
 from sqlalchemy.orm import mapped_column
@@ -28,3 +28,9 @@ class User(Base):
 class Exercise(Base):
     name: Mapped[str] = mapped_column(unique=True)
     unit: Mapped[str] = mapped_column(nullable=False)
+
+
+class Workout(Base):
+    user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
+    exercise_id: Mapped[int] = mapped_column(ForeignKey('exercises.id'))
+    value: Mapped[int]
