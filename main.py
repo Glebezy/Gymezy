@@ -2,13 +2,12 @@ import os
 from dotenv import load_dotenv
 import asyncio
 import logging
-from aiogram import Bot, Dispatcher, types
-from aiogram.filters.command import Command
+from aiogram import Bot, Dispatcher
 from bot.handlers.exercise import router as exercise_router
 from bot.handlers.workout import router as workout_router
 from bot.handlers.stats import router as stats_router
+from bot.handlers.start import router as start_router
 
-from bot.handlers.start import start_command
 from data.db import init_db
 
 logging.basicConfig(level=logging.DEBUG)
@@ -18,12 +17,7 @@ load_dotenv()
 bot = Bot(token=os.getenv("BOT_TOKEN"))
 user = os.getenv("USER_ID")
 dp = Dispatcher()
-dp.include_routers(exercise_router, workout_router, stats_router)
-
-
-@dp.message(Command("start"))
-async def cmd_start(message: types.Message):
-    await start_command(message)
+dp.include_routers(exercise_router, workout_router, stats_router, start_router)
 
 
 async def main():

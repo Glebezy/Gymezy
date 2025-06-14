@@ -32,3 +32,5 @@ yarl==1.20.0
 pytest
 pytest-asyncio
 aiosqlite~=0.21.0
+plotly~=6.1.2
+kaleido
