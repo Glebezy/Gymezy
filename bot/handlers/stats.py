@@ -103,7 +103,10 @@ async def get_exercise_statistics(callback: CallbackQuery, state: FSMContext):
         workout_data = result.all()
         data = [(row.name, row.value, row.created_at) for row in workout_data]
 
-        await generate_plotly_chart(data, callback.message, days)
+        if not data:
+            await callback.message.edit_text("Данных по этому упражнению нет")
+        else:
+            await generate_plotly_chart(data, callback.message, days)
 
 
 async def generate_plotly_chart(data: list[tuple], message: Message, days):
