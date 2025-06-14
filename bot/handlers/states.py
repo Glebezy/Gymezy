@@ -10,3 +10,8 @@ class ExerciseStates(StatesGroup):
 class WorkoutStates(StatesGroup):
     choosing_exercise = State()
     entering_value = State()
+
+
+class StatStates(StatesGroup):
+    choosing_exercise = State()
+    choosing_date_interval = State()

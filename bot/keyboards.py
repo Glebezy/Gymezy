@@ -33,3 +33,17 @@ def cancel_exercise_keyboard() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.button(text="Отмена", callback_data='cancel')
     return kb.as_markup()
+
+
+def stats_date_keyboard() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(text="Вчера", callback_data='1_stats')
+    kb.button(text="Неделя", callback_data='7_stats')
+    kb.button(text="Месяц", callback_data='30_stats')
+    kb.button(text="Квартал", callback_data='90_stats')
+    kb.button(text="Полгода", callback_data='180_stats')
+    kb.button(text="Год", callback_data='365_stats')
+    kb.button(text="Все время", callback_data='total_stats')
+
+    kb.adjust(2)
+    return kb.as_markup()
