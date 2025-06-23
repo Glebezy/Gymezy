@@ -29,8 +29,9 @@ SQLAlchemy==2.0.40
 typing-inspection==0.4.0
 typing_extensions==4.13.2
 yarl==1.20.0
-pytest
+pytest~=8.3.5
 pytest-asyncio
 aiosqlite~=0.21.0
 plotly~=6.1.2
 kaleido
+Telethon~=1.40.0
