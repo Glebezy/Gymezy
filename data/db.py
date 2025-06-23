@@ -5,7 +5,10 @@ from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sess
 from data.models import Base
 from dotenv import load_dotenv
 
-load_dotenv()
+
+env = os.getenv('ENV', 'prod')  # По умолчанию 'test'
+load_dotenv(f'.env.{env}')
+
 
 DATA_DIR = Path(__file__).parent / "database"
 DATA_DIR.mkdir(exist_ok=True)

@@ -3,21 +3,33 @@ from dotenv import load_dotenv
 import asyncio
 import logging
 from aiogram import Bot, Dispatcher
-from bot.handlers.exercise import router as exercise_router
-from bot.handlers.workout import router as workout_router
-from bot.handlers.stats import router as stats_router
-from bot.handlers.start import router as start_router
-
+from bot.handlers import stats, start, workout, exercise
+from aiogram.client.telegram import TelegramAPIServer
+from aiogram.client.session.aiohttp import AiohttpSession
 from data.db import init_db
 
 logging.basicConfig(level=logging.DEBUG)
 
+env = os.getenv('ENV', 'prod')  # По умолчанию 'test'
+load_dotenv(f'.env.{env}')
 
-load_dotenv()
-bot = Bot(token=os.getenv("BOT_TOKEN"))
+
+def get_session():
+    if os.getenv("env") == 'test':
+        return AiohttpSession(
+            api=TelegramAPIServer(
+                base="https://api.telegram.org/bot{token}/test/{method}",
+                file="https://api.telegram.org/file/bot{token}/test/{path}",
+            )
+        )
+    else:
+        return AiohttpSession()
+
+
+bot = Bot(token=os.getenv("BOT_TOKEN"), session=get_session())
 user = os.getenv("USER_ID")
 dp = Dispatcher()
-dp.include_routers(exercise_router, workout_router, stats_router, start_router)
+dp.include_routers(exercise.router, workout.router, stats.router, start.router)
 
 
 async def main():
