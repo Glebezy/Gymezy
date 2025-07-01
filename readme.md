@@ -1,11 +1,10 @@
 Для запуска бота 
 ```
-python main.py
+make run
 ```
 
 Для запуска тестов
 ```
-python generate_session.py
-ENV=test python main.py
-pytest
+python tests/generate_session.py
+make test
 ```
