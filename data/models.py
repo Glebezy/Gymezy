@@ -27,7 +27,7 @@ class User(Base):
 
 class Exercise(Base):
     name: Mapped[str] = mapped_column(unique=True)
-    unit: Mapped[str] = mapped_column(nullable=False)
+    unit: Mapped[str] = mapped_column(nullable=False, default='раз')
 
 
 class Workout(Base):

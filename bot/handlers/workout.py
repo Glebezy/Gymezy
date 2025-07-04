@@ -6,7 +6,7 @@ from sqlalchemy import select
 from data.db import AsyncSessionLocal
 
 from .states import WorkoutStates
-from ..keyboards import exercise_list_keyboard, approve_exercise_keyboard, cancel_exercise_keyboard
+from ..keyboards import exercise_list_keyboard, approve_keyboard, cancel_keyboard
 
 router = Router()
 
@@ -33,7 +33,7 @@ async def choose_exercise(message: Message, state: FSMContext):
 
 @router.callback_query(F.data.startswith('exercise_'), WorkoutStates.choosing_exercise)
 async def enter_value(callback: types.CallbackQuery, state: FSMContext):
-    markup = cancel_exercise_keyboard()
+    markup = cancel_keyboard()
     await state.update_data(chosen_exercise=callback.data.split('_')[1])
     await state.update_data(chosen_exercise_id=callback.data.split('_')[2])
     await state.set_state(WorkoutStates.entering_value)
@@ -51,7 +51,7 @@ async def approve_exercise(message: Message, state: FSMContext):
 
     await message.answer(
         f"Вы сохраняете упражнение \"{data['chosen_exercise']}\" в кол-ве \"{data['chosen_exercise_value']}\" раз",
-        reply_markup=approve_exercise_keyboard()
+        reply_markup=approve_keyboard()
     )
 
 

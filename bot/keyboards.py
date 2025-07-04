@@ -22,14 +22,21 @@ async def exercise_list_keyboard() -> InlineKeyboardMarkup:
     return builder.as_markup()
 
 
-def approve_exercise_keyboard() -> InlineKeyboardMarkup:
+def choose_exercise_value_keyboard() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.button(text="Подтвердить", callback_data='approve')
-    kb.button(text="Отмена", callback_data='cancel')
+    kb.button(text='Оставить без изменений', callback_data='раз')
     return kb.as_markup()
 
 
-def cancel_exercise_keyboard() -> InlineKeyboardMarkup:
+def approve_keyboard() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(text="Подтвердить", callback_data='approve')
+    kb.attach(InlineKeyboardBuilder.from_markup(cancel_keyboard()))
+    kb.adjust(2)
+    return kb.as_markup()
+
+
+def cancel_keyboard() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.button(text="Отмена", callback_data='cancel')
     return kb.as_markup()

@@ -1,56 +1,65 @@
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from sqlalchemy import select
-
+from .messages import Messages
 from .states import ExerciseStates
+from ..keyboards import choose_exercise_value_keyboard, approve_keyboard
 
 router = Router()
 
 
 @router.message(Command("add_exercise"))
 async def cmd_add_exercise(message: Message, state: FSMContext):
-    await message.answer(
-        "Введите название упражнения (например, \"Жим лежа\"):"
-    )
+    await state.clear()
+    await message.answer(Messages.EXERCISE_NAME_REQUEST)
     await state.set_state(ExerciseStates.waiting_for_exercise_name)
 
 
 @router.message(ExerciseStates.waiting_for_exercise_name)
 async def process_exercise_name(message: Message, state: FSMContext):
-    # Сохраняем название упражнения
     await state.update_data(exercise_name=message.text)
 
     await message.answer(
-        "Введите единицы измерения (например, \"кг\" или \"раз\"):"
+        Messages.EXERCISE_UNIT_REQUEST,
+        reply_markup=choose_exercise_value_keyboard()
     )
     await state.set_state(ExerciseStates.waiting_for_exercise_unit)
 
 
 @router.message(ExerciseStates.waiting_for_exercise_unit)
-async def process_exercise_unit(message: Message, state: FSMContext):
-    # Сохраняем название упражнения
+async def process_exercise_unit_message(message: Message, state: FSMContext):
     await state.update_data(exercise_unit=message.text)
     data = await state.get_data()
 
     await message.answer(
-        f"Вы добавляете упражнение \"{data['exercise_name']}\" в измерении \"{data['exercise_unit']}\""
+        Messages.EXERCISE_CONFIRMATION.format(exercise_name=data['exercise_name'], exercise_unit=data['exercise_unit']),
+        reply_markup=approve_keyboard()
     )
-    await message.answer(f"Напишите \"Да\" если все верно")
     await state.set_state(ExerciseStates.waiting_for_exercise_approve)
 
 
-@router.message(ExerciseStates.waiting_for_exercise_approve)
-async def process_exercise_approve(message: Message, state: FSMContext):
-    if message.text.lower() == "да":
+@router.callback_query(ExerciseStates.waiting_for_exercise_unit)
+async def process_exercise_unit_callback(callback: CallbackQuery, state: FSMContext):
+    await state.update_data(exercise_unit=callback.data)
+    data = await state.get_data()
+
+    await callback.message.edit_text(
+        Messages.EXERCISE_CONFIRMATION.format(exercise_name=data['exercise_name'], exercise_unit=data['exercise_unit']),
+        reply_markup=approve_keyboard()
+    )
+    await state.set_state(ExerciseStates.waiting_for_exercise_approve)
+
+
+@router.callback_query(ExerciseStates.waiting_for_exercise_approve)
+async def process_exercise_approve(callback: CallbackQuery, state: FSMContext):
+    if callback.data == "approve":
         # Получаем сохраненные данные
         data = await state.get_data()
         exercise_name = data['exercise_name'].lower()
         unit = data['exercise_unit']
 
-        # Здесь сохраняем упражнение в БД
-        # Пример (реализуйте свою логику сохранения):
         from data.models import Exercise
         from data.db import AsyncSessionLocal
 
@@ -66,13 +75,13 @@ async def process_exercise_approve(message: Message, state: FSMContext):
                 )
                 session.add(new_exercise)
                 await session.commit()
-                await message.answer(
-                    f"Упражнение \"{data['exercise_name']}\" ({unit}) успешно добавлено!"
+                await callback.message.edit_text(
+                    Messages.EXERCISE_ADDED.format(exercise_name=data['exercise_name']),
                 )
             else:
-                await message.answer(
-                    f"Упражнение \"{data['exercise_name']}\" уже существует!"
+                await callback.message.edit_text(
+                    Messages.EXERCISE_EXISTS.format(exercise_name=data['exercise_name'])
                 )
     else:
-        await message.answer("Для добавления упражнения введите /add_exercise")
+        await callback.message.edit_text(Messages.ADD_EXERCISE_COMMAND)
     await state.clear()
