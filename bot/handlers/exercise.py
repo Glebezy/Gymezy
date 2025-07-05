@@ -1,4 +1,4 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
@@ -14,6 +14,13 @@ router = Router()
 async def cmd_add_exercise(message: Message, state: FSMContext):
     await state.clear()
     await message.answer(Messages.EXERCISE_NAME_REQUEST)
+    await state.set_state(ExerciseStates.waiting_for_exercise_name)
+
+
+@router.callback_query(F.data == "add_exercise")
+async def cmd_add_exercise_callback(callback: CallbackQuery, state: FSMContext):
+    await state.clear()
+    await callback.message.answer(Messages.EXERCISE_NAME_REQUEST)
     await state.set_state(ExerciseStates.waiting_for_exercise_name)
 
 
@@ -55,7 +62,6 @@ async def process_exercise_unit_callback(callback: CallbackQuery, state: FSMCont
 @router.callback_query(ExerciseStates.waiting_for_exercise_approve)
 async def process_exercise_approve(callback: CallbackQuery, state: FSMContext):
     if callback.data == "approve":
-        # Получаем сохраненные данные
         data = await state.get_data()
         exercise_name = data['exercise_name'].lower()
         unit = data['exercise_unit']
@@ -76,7 +82,7 @@ async def process_exercise_approve(callback: CallbackQuery, state: FSMContext):
                 session.add(new_exercise)
                 await session.commit()
                 await callback.message.edit_text(
-                    Messages.EXERCISE_ADDED.format(exercise_name=data['exercise_name']),
+                    Messages.EXERCISE_ADDED.format(exercise_name=data['exercise_name'], unit=unit),
                 )
             else:
                 await callback.message.edit_text(

@@ -15,10 +15,23 @@ async def exercise_list_keyboard() -> InlineKeyboardMarkup:
 
         if exercises:
             for exercise in exercises:
-                builder.button(text=exercise.name, callback_data=f"exercise_{exercise.name}_{exercise.id}")
+                builder.button(text=exercise.name, callback_data=f"exercise_{exercise.name}_{exercise.id}_{exercise.unit}")
 
     builder.adjust(2)
 
+    return builder.as_markup()
+
+
+def add_exercise_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text='Добавить упражнение', callback_data='add_exercise')
+    return builder.as_markup()
+
+
+def start_workout_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text='Продолжить тренировку', callback_data='start_workout')
+    builder.attach(InlineKeyboardBuilder.from_markup(cancel_keyboard()))
     return builder.as_markup()
 
 
