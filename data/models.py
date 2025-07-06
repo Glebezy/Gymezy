@@ -1,7 +1,6 @@
 from sqlalchemy import Integer, ForeignKey
 from sqlalchemy.ext.asyncio import AsyncAttrs
-from sqlalchemy.orm import Mapped, declared_attr
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import Mapped, declared_attr, relationship, mapped_column
 from datetime import datetime
 from sqlalchemy.orm import DeclarativeBase
 
@@ -24,13 +23,20 @@ class User(Base):
     name: Mapped[str]
     username: Mapped[str]
 
+    workouts = relationship("Workout", back_populates="user")
+
 
 class Exercise(Base):
     name: Mapped[str] = mapped_column(unique=True)
     unit: Mapped[str] = mapped_column(nullable=False, default='раз')
+
+    workouts = relationship("Workout", back_populates="exercise")
 
 
 class Workout(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey('users.id'))
     exercise_id: Mapped[int] = mapped_column(ForeignKey('exercises.id'))
     value: Mapped[int]
+
+    exercise = relationship("Exercise", back_populates="workouts")
+    user = relationship("User", back_populates="workouts")

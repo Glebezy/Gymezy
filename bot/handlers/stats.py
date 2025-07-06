@@ -27,7 +27,7 @@ async def get_daily_stats(telegram_id):
         start_of_day = datetime.combine(now.date(), time.min)
         start_of_day_timestamp = int(start_of_day.timestamp())
 
-        query = select(Exercise.name, Workout.value, Workout.created_at
+        query = select(Exercise.name, Exercise.unit, Workout.value, Workout.created_at
                        ).join(Exercise, Exercise.id == Workout.exercise_id).where(
             Workout.user_id == user_id,
             Workout.created_at >= start_of_day_timestamp
@@ -37,6 +37,18 @@ async def get_daily_stats(telegram_id):
         return result.all()
 
 
+async def compile_daily_stats(daily_workouts):
+    i = 1
+    report = [Messages.STATS_DAILY_TEXT]
+    for workout in daily_workouts:
+        dt = datetime.fromtimestamp(workout.created_at)
+        report.append(
+            f"{i}. {workout.name.capitalize()} {workout.value} {workout.unit} в {dt.strftime('%H:%M')}"
+        )
+        i += 1
+    return report
+
+
 async def print_daily_stats(message: Message):
     daily_workouts = await get_daily_stats(message.from_user.id)
 
@@ -44,16 +56,9 @@ async def print_daily_stats(message: Message):
         await message.answer(Messages.STATS_EMPTY_DAILY_TEXT)
         return
 
-    i = 1
-    report = [Messages.STATS_DAILY_TEXT]
-    for workout in daily_workouts:
-        dt = datetime.fromtimestamp(workout.created_at)
-        report.append(
-            f"{i}. {workout.name.capitalize()} {workout.value} раз в {dt.strftime('%H:%M')}"
-        )
-        i += 1
+    daily_stats = await compile_daily_stats(daily_workouts)
 
-    await message.answer("\n".join(report))
+    await message.answer("\n".join(daily_stats))
 
 
 @router.message(Command('stats'))

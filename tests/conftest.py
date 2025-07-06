@@ -1,5 +1,4 @@
 import asyncio
-
 import pytest
 import pytest_asyncio
 from aiogram.client.session.aiohttp import AiohttpSession
@@ -12,6 +11,7 @@ from app import start_bot
 from bot.utils import get_bot
 from data.db import AsyncSessionLocal
 from data.models import Base
+from data.factories import UserFactory
 
 
 @pytest_asyncio.fixture(scope='session')
@@ -66,3 +66,21 @@ async def run_bot_in_background():
         await bot_task
     except asyncio.CancelledError:
         pass
+
+
+@pytest.fixture
+async def new_user():
+    return await UserFactory.create_async()
+
+
+@pytest.fixture()
+async def user_with_workouts():
+    async def _create(workouts_count=1):
+        return await UserFactory.create_with_workouts(workouts_count=workouts_count)
+
+    return _create
+
+
+@pytest.fixture(autouse=True)
+def get_botname():
+    return os.getenv('BOT_USERNAME')
