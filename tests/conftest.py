@@ -8,7 +8,7 @@ from telethon import TelegramClient
 from telethon.sessions import StringSession
 import os
 from app import start_bot
-from bot.utils import get_bot
+from bot.utils.bot import get_bot
 from data.db import AsyncSessionLocal
 from data.models import Base
 from data.factories import UserFactory
@@ -60,6 +60,7 @@ async def clean_db(db_session: AsyncSession):
 @pytest.fixture(scope="session", autouse=True)
 async def run_bot_in_background():
     bot_task = asyncio.create_task(start_bot('test', get_bot('test')))
+    await asyncio.sleep(1)
     yield
     bot_task.cancel()
     try:

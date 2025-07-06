@@ -3,7 +3,7 @@ import asyncio
 import logging
 from aiogram import Dispatcher
 from bot.handlers import start, exercise, workout, stats
-from bot.utils import get_bot
+from bot.utils.bot import get_bot
 from data.db import create_db
 
 logging.basicConfig(level=logging.DEBUG)
@@ -19,5 +19,5 @@ async def start_bot(env, bot):
 
 
 if __name__ == "__main__":
-    env= os.getenv("ENV")
+    env = os.getenv("ENV")
     asyncio.run(start_bot(env, get_bot(env)))

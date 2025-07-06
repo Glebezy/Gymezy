@@ -5,7 +5,7 @@ from aiogram.filters import Command
 from data.db import AsyncSessionLocal
 from sqlalchemy import select
 from data.models import User
-from .messages import Messages
+from bot.utils.messages import Messages
 
 router = Router()
 

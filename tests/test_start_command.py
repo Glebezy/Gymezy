@@ -1,9 +1,9 @@
 import pytest
 from telethon import TelegramClient
 from sqlalchemy import select
-from bot.handlers.messages import Messages
-from bot.handlers.commands import Commands
-from bot.handlers.stats import get_daily_stats, compile_daily_stats
+from bot.utils.messages import Messages
+from bot.utils.commands import Commands
+from bot.handlers.stats import compile_daily_stats
 from data.db import AsyncSessionLocal
 from data.models import User
 from .utils import check_answer
@@ -39,8 +39,7 @@ async def test_existing_user_welcome(client: TelegramClient, new_user, get_botna
 @pytest.mark.asyncio
 async def test_existing_user_with_workouts_welcome(client: TelegramClient, user_with_workouts, get_botname):
     user = await user_with_workouts(3)
-    daily_workouts = await get_daily_stats(user.telegram_id)
-    daily_workout_stats = await compile_daily_stats(daily_workouts)
+    daily_workout_stats = await compile_daily_stats(user.telegram_id)
 
     entity = await client.get_entity(get_botname)
     await client.send_message(entity, Commands.START)

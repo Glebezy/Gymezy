@@ -3,9 +3,9 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, CallbackQuery
 from sqlalchemy import select
-from .messages import Messages
+from bot.utils.messages import Messages
 from .states import ExerciseStates
-from ..keyboards import choose_exercise_value_keyboard, approve_keyboard
+from bot.utils.keyboards import choose_exercise_value_keyboard, approve_keyboard
 
 router = Router()
 

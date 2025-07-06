@@ -4,10 +4,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
 from sqlalchemy import select
 from data.db import AsyncSessionLocal
-from .messages import Messages
+from bot.utils.messages import Messages
 
 from .states import WorkoutStates
-from ..keyboards import exercise_list_keyboard, approve_keyboard, cancel_keyboard, add_exercise_keyboard, \
+from bot.utils.keyboards import exercise_list_keyboard, approve_keyboard, cancel_keyboard, add_exercise_keyboard, \
     start_workout_keyboard
 
 router = Router()

@@ -8,15 +8,15 @@ from sqlalchemy import select
 from aiogram.fsm.context import FSMContext
 
 from bot.handlers.states import StatStates
-from bot.keyboards import exercise_list_keyboard, stats_date_keyboard
+from bot.utils.keyboards import exercise_list_keyboard, stats_date_keyboard
 from data.db import AsyncSessionLocal
 from data.models import Workout, User, Exercise
-from .messages import Messages
+from bot.utils.messages import Messages
 
 router = Router()
 
 
-async def get_daily_stats(telegram_id):
+async def _get_daily_stats_from_db(telegram_id):
     async with AsyncSessionLocal() as session:
         result = await session.execute(
             select(User.id).filter(User.telegram_id == telegram_id)
@@ -37,7 +37,8 @@ async def get_daily_stats(telegram_id):
         return result.all()
 
 
-async def compile_daily_stats(daily_workouts):
+async def compile_daily_stats(telegram_id):
+    daily_workouts = await _get_daily_stats_from_db(telegram_id)
     i = 1
     report = [Messages.STATS_DAILY_TEXT]
     for workout in daily_workouts:
@@ -50,15 +51,13 @@ async def compile_daily_stats(daily_workouts):
 
 
 async def print_daily_stats(message: Message):
-    daily_workouts = await get_daily_stats(message.from_user.id)
+    daily_workouts = await compile_daily_stats(message.from_user.id)
 
-    if not daily_workouts:
+    if len(daily_workouts) < 2:
         await message.answer(Messages.STATS_EMPTY_DAILY_TEXT)
         return
 
-    daily_stats = await compile_daily_stats(daily_workouts)
-
-    await message.answer("\n".join(daily_stats))
+    await message.answer("\n".join(daily_workouts))
 
 
 @router.message(Command('stats'))
