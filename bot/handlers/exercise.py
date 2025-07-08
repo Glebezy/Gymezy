@@ -19,12 +19,13 @@ async def cmd_add_exercise(message: Message, state: FSMContext):
 
 @router.callback_query(F.data == "add_exercise")
 async def cmd_add_exercise_callback(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
     await state.clear()
     await callback.message.answer(Messages.EXERCISE_NAME_REQUEST)
     await state.set_state(ExerciseStates.waiting_for_exercise_name)
 
 
-@router.message(ExerciseStates.waiting_for_exercise_name)
+@router.message(ExerciseStates.waiting_for_exercise_name, F.text.not_contains("/"))
 async def process_exercise_name(message: Message, state: FSMContext):
     await state.update_data(exercise_name=message.text)
 
@@ -35,7 +36,7 @@ async def process_exercise_name(message: Message, state: FSMContext):
     await state.set_state(ExerciseStates.waiting_for_exercise_unit)
 
 
-@router.message(ExerciseStates.waiting_for_exercise_unit)
+@router.message(ExerciseStates.waiting_for_exercise_unit, F.text.not_contains("/"))
 async def process_exercise_unit_message(message: Message, state: FSMContext):
     await state.update_data(exercise_unit=message.text)
     data = await state.get_data()
@@ -49,6 +50,7 @@ async def process_exercise_unit_message(message: Message, state: FSMContext):
 
 @router.callback_query(ExerciseStates.waiting_for_exercise_unit)
 async def process_exercise_unit_callback(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
     await state.update_data(exercise_unit=callback.data)
     data = await state.get_data()
 
@@ -61,6 +63,7 @@ async def process_exercise_unit_callback(callback: CallbackQuery, state: FSMCont
 
 @router.callback_query(ExerciseStates.waiting_for_exercise_approve)
 async def process_exercise_approve(callback: CallbackQuery, state: FSMContext):
+    await callback.answer()
     if callback.data == "approve":
         data = await state.get_data()
         exercise_name = data['exercise_name'].lower()

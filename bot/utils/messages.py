@@ -10,7 +10,7 @@ class Messages:
     EXERCISE_ADDED = "Готово! «{exercise_name}» ({unit}) добавлено"
     EXERCISE_EXISTS = "«{exercise_name}» уже существует"
 
-    WORKOUT_WELCOME_TEXT = "Добро пожаловать в форму создания тренировки\n"
+    WORKOUT_WELCOME_TEXT = "Добро пожаловать в форму создания тренировки"
     WORKOUT_EMPTY_EXERCISE = "Нет доступных упражнений"
     WORKOUT_CHOOSE_EXERCISE = "Список упражнений:"
     WORKOUT_EXERCISE_VALUE = "Количество выполненных {unit}"

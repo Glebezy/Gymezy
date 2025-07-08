@@ -83,5 +83,16 @@ async def user_with_workouts():
 
 
 @pytest.fixture(autouse=True)
-def get_botname():
+def _get_botname():
     return os.getenv('BOT_USERNAME')
+
+
+@pytest.fixture(autouse=True)
+async def bot_conversation(client: TelegramClient, _get_botname):
+    entity = await client.get_entity(_get_botname)
+    async with client.conversation(entity, exclusive=False) as conv:
+        yield conv
+        try:
+            await conv.cancel()
+        except Exception:
+            pass

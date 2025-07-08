@@ -15,6 +15,7 @@ router = Router()
 
 @router.message(Command('start_workout'))
 async def cmd_start_workout(message: Message, state: FSMContext):
+    await state.clear()
     await state.update_data(telegram_id=message.from_user.id)
     await message.answer(Messages.WORKOUT_WELCOME_TEXT)
     await choose_exercise(message, state)
