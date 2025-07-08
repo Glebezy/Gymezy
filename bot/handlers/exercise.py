@@ -27,7 +27,7 @@ async def cmd_add_exercise_callback(callback: CallbackQuery, state: FSMContext):
 
 @router.message(ExerciseStates.waiting_for_exercise_name, F.text.not_contains("/"))
 async def process_exercise_name(message: Message, state: FSMContext):
-    await state.update_data(exercise_name=message.text)
+    await state.update_data(exercise_name=message.text.capitalize())
 
     await message.answer(
         Messages.EXERCISE_UNIT_REQUEST,
@@ -66,7 +66,7 @@ async def process_exercise_approve(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
     if callback.data == "approve":
         data = await state.get_data()
-        exercise_name = data['exercise_name'].lower()
+        exercise_name = data['exercise_name']
         unit = data['exercise_unit']
 
         from data.models import Exercise

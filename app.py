@@ -6,7 +6,7 @@ from bot.handlers import start, exercise, workout, stats
 from bot.utils.bot import get_bot
 from data.db import create_db
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 
 dp = Dispatcher()

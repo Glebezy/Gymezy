@@ -3,3 +3,4 @@
 /data/databases/
 /.idea/
 *.session
+/allure-results/

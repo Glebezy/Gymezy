@@ -88,7 +88,7 @@ def _get_botname():
 
 
 @pytest.fixture(autouse=True)
-async def bot_conversation(client: TelegramClient, _get_botname):
+async def conversation(client: TelegramClient, _get_botname):
     entity = await client.get_entity(_get_botname)
     async with client.conversation(entity, exclusive=False) as conv:
         yield conv

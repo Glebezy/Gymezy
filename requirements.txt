@@ -17,7 +17,7 @@ matplotlib==3.10.1
 multidict==6.4.3
 numpy==2.2.5
 packaging==25.0
-pillow==11.2.1
+pillow==11.3.0
 propcache==0.3.1
 pydantic==2.11.3
 pydantic_core==2.33.1
@@ -36,3 +36,4 @@ plotly~=6.1.2
 kaleido
 Telethon~=1.40.0
 Faker~=37.4.0
+allure-pytest
