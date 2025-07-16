@@ -11,7 +11,7 @@ from app import start_bot
 from bot.utils.bot import get_bot
 from data.db import AsyncSessionLocal
 from data.models import Base
-from data.factories import UserFactory
+from data.factories import UserFactory, ExerciseFactory
 
 
 @pytest_asyncio.fixture(scope='session')
@@ -80,6 +80,11 @@ async def user_with_workouts():
         return await UserFactory.create_with_workouts(workouts_count=workouts_count)
 
     return _create
+
+
+@pytest.fixture()
+async def new_exercise():
+    return await ExerciseFactory.create_async()
 
 
 @pytest.fixture(autouse=True)

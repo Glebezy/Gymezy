@@ -91,6 +91,6 @@ async def process_exercise_approve(callback: CallbackQuery, state: FSMContext):
                 await callback.message.edit_text(
                     Messages.EXERCISE_EXISTS.format(exercise_name=data['exercise_name'])
                 )
+                await cmd_add_exercise(callback.message, state)
     else:
-        await callback.message.edit_text(Messages.ADD_EXERCISE_COMMAND)
-    await state.clear()
+        await cmd_add_exercise(callback.message, state)
