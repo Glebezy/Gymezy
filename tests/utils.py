@@ -1,8 +1,8 @@
-import allure
+from allure_commons._allure import step
 from telethon.tl.custom import Conversation
 
 
-@allure.step("Проверяем ответ от бота")
+@step("Проверяем ответ от бота")
 async def check_response(conv: Conversation, exp_message_text=None, buttons=None, count=1, edited=False):
     if edited:
         msg = await conv.get_edit()
@@ -13,11 +13,11 @@ async def check_response(conv: Conversation, exp_message_text=None, buttons=None
     if exp_message_text is None:
         return msg
 
-    with allure.step(f"Проверяем текст сообщения"):
+    with step(f"Проверяем текст сообщения"):
         assert msg.message == exp_message_text, f'Текст сообщения не совпадает {msg.message} != {exp_message_text}'
 
     if buttons is not None:
-        with allure.step(f'Проверяем примыкающую клавиатуру'):
+        with step(f'Проверяем примыкающую клавиатуру'):
 
             markup_buttons = []
             for row in msg.reply_markup.rows:
@@ -38,11 +38,11 @@ async def check_response(conv: Conversation, exp_message_text=None, buttons=None
     return msg
 
 
-@allure.step("Отправляем боту сообщение '{message}'")
+@step("Отправляем боту сообщение '{message}'")
 async def send_message(conv: Conversation, message):
     await conv.send_message(message)
 
 
-@allure.step("Нажимаем на кнопку '{data}'")
-async def click_button(message, data):
-    await message.click(data=data)
+@step("Нажимаем на кнопку {data} или {text}")
+async def click_button(message, data=None, text=None):
+    await message.click(data=data, text=text)

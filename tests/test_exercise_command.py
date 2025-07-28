@@ -5,7 +5,7 @@ from sqlalchemy import select
 from bot.utils.commands import Commands
 from bot.utils.messages import Messages
 from data.models import Exercise
-from utils import send_message, check_response, click_button
+from .utils import send_message, check_response, click_button
 
 approve_buttons = [{
             "text": 'Подтвердить',

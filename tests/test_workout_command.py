@@ -3,8 +3,9 @@ import pytest
 from sqlalchemy import select
 from bot.utils.commands import Commands
 from bot.utils.messages import Messages
-from data.models import Exercise
+from data.models import Exercise, Workout
 from .utils import check_response, send_message, click_button
+from allure import step, title
 
 exercise_buttons = [{
         "text": 'Добавить упражнение',
@@ -24,14 +25,14 @@ approve_buttons = [{
 @allure.story('Workout Commands')
 class TestWorkoutCommand:
 
-    @allure.title("Запуск тренировки без упражнений")
+    @title("Запуск тренировки без упражнений")
     async def test_workout_command_without_exercise(self, conversation):
         async with conversation as conv:
             await send_message(conv, Commands.START_WORKOUT)
             await check_response(conv, Messages.WORKOUT_WELCOME_TEXT)
             await check_response(conv, Messages.WORKOUT_EMPTY_EXERCISE, exercise_buttons)
 
-    @allure.title("Создания упражнения из формы тренировки")
+    @title("Создания упражнения из формы тренировки")
     @pytest.mark.parametrize('exercise_name, exercise_unit', [("Присед", "раз")])
     async def test_create_exercise_with_default_unit_from_workout(self, conversation, db_session, exercise_name, exercise_unit):
         async with conversation as conv:
@@ -69,3 +70,40 @@ class TestWorkoutCommand:
             await send_message(conv, Commands.START_WORKOUT)
             await check_response(conv, Messages.WORKOUT_WELCOME_TEXT)
             await check_response(conv, Messages.WORKOUT_CHOOSE_EXERCISE, buttons=exercise_buttons)
+
+    @title("Создание тренировки")
+    async def test_create_workout(self, conversation, new_user, new_exercise, db_session):
+        with step('Проверяем пустую таблицу тренировок'):
+            result = await db_session.execute(select(Workout))
+            assert len(result.scalars().all()) == 0
+
+        async with conversation as conv:
+            await send_message(conv, Commands.START_WORKOUT)
+            await check_response(conv, Messages.WORKOUT_WELCOME_TEXT)
+
+            resp = await check_response(conv, Messages.WORKOUT_CHOOSE_EXERCISE)
+            await click_button(resp, text=new_exercise.name)
+
+            await check_response(conv, Messages.WORKOUT_EXERCISE_VALUE.format(unit=new_exercise.unit), edited=True)
+            await send_message(conv, '15')
+            resp = await check_response(conv, Messages.WORKOUT_EXERCISE_CONFIRMATION.format(
+                exercise=new_exercise.name,
+                value=15,
+                unit=new_exercise.unit
+            ), buttons=approve_buttons)
+            await click_button(resp, data="approve")
+            await check_response(conv, Messages.WORKOUT_EXERCISE_ADDED.format(
+                exercise=new_exercise.name,
+                value=15,
+                unit=new_exercise.unit
+            ), edited=True)
+
+            with step('Проверяем добавление тренировки в базу'):
+                result = await db_session.execute(select(Workout))
+                db_workout = result.scalars().one()
+
+                assert db_workout.exercise_id == new_exercise.id
+                assert db_workout.user_id == new_user.id
+                assert db_workout.value == 15
+
+

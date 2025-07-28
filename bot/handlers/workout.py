@@ -38,6 +38,7 @@ async def choose_exercise(message: Message, state: FSMContext):
 
 @router.callback_query(F.data.startswith('exercise_'), WorkoutStates.choosing_exercise)
 async def enter_value(callback: types.CallbackQuery, state: FSMContext):
+    await callback.answer()
     markup = cancel_keyboard()
     await state.update_data(chosen_exercise=callback.data.split('_')[1])
     await state.update_data(chosen_exercise_id=callback.data.split('_')[2])
@@ -65,6 +66,7 @@ async def approve_exercise(message: Message, state: FSMContext):
 
 @router.callback_query(F.data == 'approve', WorkoutStates.entering_value)
 async def save_exercise(callback: types.CallbackQuery, state: FSMContext):
+    await callback.answer()
     data = await state.get_data()
     exercise_id = data['chosen_exercise_id']
     value = data['chosen_exercise_value']
@@ -96,17 +98,20 @@ async def save_exercise(callback: types.CallbackQuery, state: FSMContext):
 
 @router.callback_query(F.data == 'cancel', WorkoutStates.entering_value)
 async def cancel_exercise(callback: types.CallbackQuery, state: FSMContext):
+    await callback.answer()
     await callback.message.delete()
     await choose_exercise(callback.message, state)
 
 
 @router.callback_query(F.data == 'cancel', WorkoutStates.saving_exercise)
 async def cancel_workout(callback: types.CallbackQuery, state: FSMContext):
+    await callback.answer()
     await callback.message.delete()
     await state.clear()
 
 
 @router.callback_query(F.data == 'start_workout')
 async def return_to_start_workout(callback: types.CallbackQuery, state: FSMContext):
+    await callback.answer()
     await callback.message.delete()
     await choose_exercise(callback.message, state)

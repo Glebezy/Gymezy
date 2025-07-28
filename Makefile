@@ -1,4 +1,4 @@
-.PHONY: test test-cov run run-test install clean allure
+.PHONY: test run run-test install clean-allure allure clean help
 
 # Переменные окружения
 ENV_TEST := ENV=test

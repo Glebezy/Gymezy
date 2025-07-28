@@ -29,6 +29,8 @@ async def generate_session():
     session_string = client.session.save()
     print(f"\nВаша session string (сохранена в .env.test):\n{session_string}")
 
+    # TO-DO при устаревании сессии новая не перезаписывается в енв
+
     # Автоматическое сохранение в .env.test
     with open('../.env.test', 'a') as f:
         f.write(f"\nSESSION_STRING={session_string}")
