@@ -15,21 +15,41 @@ async def exercise_list_keyboard() -> InlineKeyboardMarkup:
 
         if exercises:
             for exercise in exercises:
-                builder.button(text=exercise.name, callback_data=f"exercise_{exercise.name}_{exercise.id}")
+                builder.button(text=exercise.name, callback_data=f"exercise_{exercise.name}_{exercise.id}_{exercise.unit}")
 
     builder.adjust(2)
 
     return builder.as_markup()
 
 
-def approve_exercise_keyboard() -> InlineKeyboardMarkup:
+def add_exercise_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text='Добавить упражнение', callback_data='add_exercise')
+    return builder.as_markup()
+
+
+def start_workout_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.button(text='Продолжить тренировку', callback_data='start_workout')
+    builder.attach(InlineKeyboardBuilder.from_markup(cancel_keyboard()))
+    return builder.as_markup()
+
+
+def choose_exercise_value_keyboard() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
-    kb.button(text="Подтвердить", callback_data='approve')
-    kb.button(text="Отмена", callback_data='cancel')
+    kb.button(text='Оставить без изменений', callback_data='раз')
     return kb.as_markup()
 
 
-def cancel_exercise_keyboard() -> InlineKeyboardMarkup:
+def approve_keyboard() -> InlineKeyboardMarkup:
+    kb = InlineKeyboardBuilder()
+    kb.button(text="Подтвердить", callback_data='approve')
+    kb.attach(InlineKeyboardBuilder.from_markup(cancel_keyboard()))
+    kb.adjust(2)
+    return kb.as_markup()
+
+
+def cancel_keyboard() -> InlineKeyboardMarkup:
     kb = InlineKeyboardBuilder()
     kb.button(text="Отмена", callback_data='cancel')
     return kb.as_markup()

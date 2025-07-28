@@ -8,14 +8,15 @@ from sqlalchemy import select
 from aiogram.fsm.context import FSMContext
 
 from bot.handlers.states import StatStates
-from bot.keyboards import exercise_list_keyboard, stats_date_keyboard
+from bot.utils.keyboards import exercise_list_keyboard, stats_date_keyboard
 from data.db import AsyncSessionLocal
 from data.models import Workout, User, Exercise
+from bot.utils.messages import Messages
 
 router = Router()
 
 
-async def get_daily_stats(telegram_id):
+async def _get_daily_stats_from_db(telegram_id):
     async with AsyncSessionLocal() as session:
         result = await session.execute(
             select(User.id).filter(User.telegram_id == telegram_id)
@@ -26,7 +27,7 @@ async def get_daily_stats(telegram_id):
         start_of_day = datetime.combine(now.date(), time.min)
         start_of_day_timestamp = int(start_of_day.timestamp())
 
-        query = select(Exercise.name, Workout.value, Workout.created_at
+        query = select(Exercise.name, Exercise.unit, Workout.value, Workout.created_at
                        ).join(Exercise, Exercise.id == Workout.exercise_id).where(
             Workout.user_id == user_id,
             Workout.created_at >= start_of_day_timestamp
@@ -36,23 +37,27 @@ async def get_daily_stats(telegram_id):
         return result.all()
 
 
-async def print_daily_stats(message: Message):
-    daily_workouts = await get_daily_stats(message.from_user.id)
-
-    if not daily_workouts:
-        await message.answer("За сегодня тренировок нет")
-        return
-
+async def compile_daily_stats(telegram_id):
+    daily_workouts = await _get_daily_stats_from_db(telegram_id)
     i = 1
-    report = ["🏋️ Ваши тренировки за сегодня:\n"]
+    report = [Messages.STATS_DAILY_TEXT]
     for workout in daily_workouts:
         dt = datetime.fromtimestamp(workout.created_at)
         report.append(
-            f"{i}. {workout.name.capitalize()} {workout.value} раз в {dt.strftime('%H:%M')}"
+            f"{i}. {workout.name.capitalize()} {workout.value} {workout.unit} в {dt.strftime('%H:%M')}"
         )
         i += 1
+    return report
 
-    await message.answer("\n".join(report))
+
+async def print_daily_stats(message: Message):
+    daily_workouts = await compile_daily_stats(message.from_user.id)
+
+    if len(daily_workouts) < 2:
+        await message.answer(Messages.STATS_EMPTY_DAILY_TEXT)
+        return
+
+    await message.answer("\n".join(daily_workouts))
 
 
 @router.message(Command('stats'))
@@ -60,12 +65,11 @@ async def cmd_stats(message: Message, state: FSMContext):
     await state.update_data(telegram_id=message.from_user.id)
     markup = await exercise_list_keyboard()
     if not markup.inline_keyboard:
-        await message.answer(f"Извините, в данный момент нет доступных упражнений.")
+        await message.answer(Messages.WORKOUT_EMPTY_EXERCISE)
     else:
-        await message.answer(
-            f"Выберите упражнение для отображения статистики \n",
-            reply_markup=markup
-        )
+        await message.answer(Messages.STATS_CHOOSE_EXERCISE,
+                             reply_markup=markup
+                             )
         await state.set_state(StatStates.choosing_exercise)
 
 
@@ -76,7 +80,7 @@ async def choose_date_interval(callback: CallbackQuery, state: FSMContext):
 
     await state.set_state(StatStates.choosing_date_interval)
 
-    await callback.message.edit_text(text="Укажите интервал в днях, за который необходимо отобразить статистику",
+    await callback.message.edit_text(text=Messages.STATS_CHOOSE_INTERVAL,
                                      reply_markup=stats_date_keyboard())
 
 
@@ -104,7 +108,7 @@ async def get_exercise_statistics(callback: CallbackQuery, state: FSMContext):
         data = [(row.name, row.value, row.created_at) for row in workout_data]
 
         if not data:
-            await callback.message.edit_text("Данных по этому упражнению нет")
+            await callback.message.edit_text(Messages.STATS_EMPTY_EXERCISE_TEXT)
         else:
             await generate_plotly_chart(data, callback.message, days)
 
@@ -146,7 +150,7 @@ async def generate_plotly_chart(data: list[tuple], message: Message, days):
 
     await message.answer_photo(
         photo=BufferedInputFile(buf.getvalue(), filename="stats.png"),
-        caption=f'Прогресс "{exercise_name}" за {days} дней'
+        caption=Messages.STATS_EXERCISE_TEXT.format(exercise=exercise_name, days=days)
     )
 
     buf.close()

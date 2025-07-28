@@ -5,6 +5,7 @@ from aiogram.filters import Command
 from data.db import AsyncSessionLocal
 from sqlalchemy import select
 from data.models import User
+from bot.utils.messages import Messages
 
 router = Router()
 
@@ -22,7 +23,7 @@ async def start_command(message: types.Message):
         if user is None:
             await registration_user(message, session)
         else:
-            await message.answer(f"С возвращением, {user.name} 🏋️")
+            await message.answer(Messages.LOGIN_TEXT.format(user_name=user.name))
             await print_daily_stats(message)
 
 
@@ -34,7 +35,4 @@ async def registration_user(message: types.Message, session: AsyncSession):
     )
     session.add(new_user)
     await session.commit()
-    await message.answer(
-        "🎉 Добро пожаловать в GymezyBot!\n"
-        "Я помогу тебе отслеживать твои тренировки."
-    )
+    await message.answer(Messages.WELCOME_TEXT)
